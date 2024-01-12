@@ -1,0 +1,86 @@
+﻿@page "/participants/add"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IParticipantsService ParticipantsService
+@inject NavigationManager NavigationManager
+
+<h1>Agregar Participantes</h1>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col-sm-2">
+            <label>Participante ID</label>
+            <InputNumber @bind-Value="model.Part_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Part_Id)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>PartType ID</label>
+            <InputNumber @bind-Value="model.Ptype_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Ptype_Id)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>País ID</label>
+            <InputNumber @bind-Value="model.Country_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Country_Id)" />
+        </div>
+        <div class="form-group col-sm-4">
+            <label>Descripción</label>
+            <InputText @bind-Value="model.Description" class="form-control" />
+            <ValidationMessage For="@(() => model.Description)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>Activada</label>
+            <InputSelect @bind-Value="Enabled" class="form-control">
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => Enabled)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button disabled="@loading" class="btn btn-primary">
+            @if (loading) 
+            {
+                <span class="spinner-border spinner-border-sm mr-1"></span>
+            }
+            Ahorrar
+        </button>
+        <NavLink href="participants" class="btn btn-link">Cancelar</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    private Participants model = new Participants();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await ParticipantsService.Register(model);
+            AlertService.Success("participant added successfully", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("participants");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string Enabled
+    {
+        get
+        {
+            if (model.Enabled) return "true";
+            else return "false";
+        }
+        set
+        {
+            if (value.ToString() == "true") model.Enabled = true;
+            else model.Enabled = false;
+        }
+    }
+}

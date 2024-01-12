@@ -1,0 +1,116 @@
+﻿@page "/users/edit/{UserId}"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IAccountService AccountService
+@inject NavigationManager NavigationManager
+
+<h1>editar usuario</h1>
+@if (model != null)
+{
+    <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group col">
+                <label>Primer nombre</label>
+                <InputText @bind-Value="model.FirstName" class="form-control" />
+                <ValidationMessage For="@(() => model.FirstName)" />
+            </div>
+            <div class="form-group col">
+                <label>Apellido</label>
+                <InputText @bind-Value="model.LastName" class="form-control" />
+                <ValidationMessage For="@(() => model.LastName)" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col">
+                <label>Correo electrónico</label>
+                <InputText @bind-Value="model.Email" class="form-control" />
+                <ValidationMessage For="@(() => model.Email)" />
+            </div>
+            <div class="form-group col">
+                <label>
+                    Contraseña
+                    <em>(Dejar en blanco para mantener la misma contraseña)</em>
+                </label>
+                <InputText @bind-Value="model.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.Password)" />
+            </div>
+            <div class="form-group col">
+                <label>Activada</label>
+                <InputSelect @bind-Value="Enabled" class="form-control">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => Enabled)" />
+            </div>
+        </div>
+        <div class="form-group">
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading) 
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Ahorrar
+            </button>
+            <NavLink href="users" class="btn btn-link">Cancelar</NavLink>
+        </div>
+    </EditForm>
+}
+else
+{
+    <div class="text-center p-3">
+        <span class="spinner-border spinner-border-lg align-center"></span>
+    </div>
+}
+
+@code {
+    private Users model;
+    private bool loading;
+
+    [Parameter]
+    public string UserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var user = await AccountService.GetById(UserId);
+            model = user;
+        }
+        catch(Exception ex)
+        {
+            Console.Write(ex.Message);
+        }
+    }
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await AccountService.Update(UserId, model);
+            AlertService.Success("Update successful", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("users");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string Enabled
+    {
+        get
+        {
+            if (model.Enabled) return "true";
+            else return "false";
+        }
+        set
+        {
+            if (value.ToString() == "true") model.Enabled = true;
+            else model.Enabled = false;
+        }
+    }
+}

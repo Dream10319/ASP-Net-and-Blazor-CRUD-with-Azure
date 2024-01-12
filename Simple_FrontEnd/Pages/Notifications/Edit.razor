@@ -1,0 +1,72 @@
+﻿@page "/notifications/edit/{notificationId}"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject INotificationsService NotificationsService
+@inject NavigationManager NavigationManager
+
+<h1>Editar Notificaciones</h1>
+@if (model != null)
+{
+    <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group col-sm-2">
+                <label>Notificaciones ID</label>
+                <InputNumber @bind-Value="model.Notification_Id" class="form-control" />
+                <ValidationMessage For="@(() => model.Notification_Id)" />
+            </div>
+            <div class="form-group col-sm-2">
+                <label>Descripción</label>
+                <InputText @bind-Value="model.Description" class="form-control" />
+                <ValidationMessage For="@(() => model.Description)" />
+            </div>
+        </div>
+        <div class="form-group">
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Ahorrar
+            </button>
+            <NavLink href="notifications" class="btn btn-link">Cancelar</NavLink>
+        </div>
+    </EditForm>
+}
+else
+{
+    <div class="text-center p-3">
+        <span class="spinner-border spinner-border-lg align-center"></span>
+    </div>
+}
+
+@code {
+    private NotificationType model;
+    private bool loading;
+
+    [Parameter]
+    public string notificationId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var participant = await NotificationsService.GetById(notificationId);
+        model = participant;
+    }
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await NotificationsService.Update(notificationId, model);
+            AlertService.Success("Update successful", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("notifications");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

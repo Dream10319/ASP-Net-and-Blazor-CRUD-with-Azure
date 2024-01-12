@@ -1,0 +1,19 @@
+@inherits LayoutComponentBase
+@layout MainLayout
+@inject IAccountService AccountService
+@inject NavigationManager NavigationManager
+
+<div class="col-sm-12 d-flex align-items-center justify-content-center" style="margin-top:8%;">
+    @Body
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // redirect to home if already logged in
+        if (AccountService.User != null)
+        {
+            NavigationManager.NavigateTo("");
+        }
+    }
+}

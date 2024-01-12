@@ -1,0 +1,54 @@
+﻿@page "/notifications/add"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject INotificationsService NotificationsService
+@inject NavigationManager NavigationManager
+
+<h1>Agregar Notificaciones</h1>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col-sm-2">
+            <label>Notificaciones ID</label>
+            <InputNumber @bind-Value="model.Notification_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Notification_Id)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>Descripción</label>
+            <InputText @bind-Value="model.Description" class="form-control" />
+            <ValidationMessage For="@(() => model.Description)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button disabled="@loading" class="btn btn-primary">
+            @if (loading) 
+            {
+                <span class="spinner-border spinner-border-sm mr-1"></span>
+            }
+            Ahorrar
+        </button>
+        <NavLink href="notifications" class="btn btn-link">Cancelar</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    private NotificationType model = new NotificationType();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await NotificationsService.Register(model);
+            AlertService.Success("Notification added successfully", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("notifications");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

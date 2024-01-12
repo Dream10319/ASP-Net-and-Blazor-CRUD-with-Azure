@@ -1,0 +1,112 @@
+﻿@page "/clients/add"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IClientsService ClientsService
+@inject NavigationManager NavigationManager
+
+<h1>Agregar cliente</h1>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col-sm-1">
+            <label>ID de cliente</label>
+            <InputText @bind-Value="@clientID" class="form-control" />
+            <ValidationMessage For="@(() => clientID)" />
+        </div>
+        <div class="form-group col-sm-1">
+            <label>Primer nombre</label>
+            <InputNumber @bind-Value="@model.Part_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Part_Id)" />
+        </div>
+        <div class="form-group col-sm-3">
+            <label>Nombre medio</label>
+            <InputText @bind-Value="model.FirstName" class="form-control" />
+            <ValidationMessage For="@(() => model.FirstName)" />
+        </div>
+        <div class="form-group col-sm-3">
+            <label>Apellido</label>
+            <InputText @bind-Value="model.MiddleName" class="form-control" />
+            <ValidationMessage For="@(() => model.MiddleName)" />
+        </div>
+        <div class="form-group col-sm-3">
+            <label>LastName</label>
+            <InputText @bind-Value="model.LastNames" class="form-control" />
+            <ValidationMessage For="@(() => model.LastNames)" />
+        </div>
+        <div class="form-group col-sm-1">
+            <label>ID Id</label>
+            <InputNumber @bind-Value="model.Identification_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Identification_Id)" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-sm-2">
+            <label>Número de identificación</label>
+            <InputText @bind-Value="model.Identification_Number" class="form-control" />
+            <ValidationMessage For="@(() => model.Identification_Number)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>Código de país</label>
+            <InputNumber @bind-Value="model.CountryCode" class="form-control" />
+            <ValidationMessage For="@(() => model.CountryCode)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>Número de teléfono</label>
+            <InputNumber @bind-Value="model.PhoneNumber" class="form-control" />
+            <ValidationMessage For="@(() => model.PhoneNumber)" />
+        </div>
+        <div class="form-group col-sm-4">
+            <label>Correo electrónico</label>
+            <InputText @bind-Value="model.Email" class="form-control" />
+            <ValidationMessage For="@(() => model.Email)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>Último cambio de ID de usuario</label>
+            <InputNumber @bind-Value="model.Last_User_Id_Change" class="form-control" />
+            <ValidationMessage For="@(() => model.Last_User_Id_Change)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button disabled="@loading" class="btn btn-primary">
+            @if (loading) 
+            {
+                <span class="spinner-border spinner-border-sm mr-1"></span>
+            }
+            Ahorrar
+        </button>
+        <NavLink href="clients" class="btn btn-link">Cancelar</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    private Custumers model = new Custumers();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            model.CreateDate = DateTime.Now;
+            model.UpdateDate = DateTime.Now;
+            await ClientsService.Register(model);
+            AlertService.Success("Client added successfully", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("clients");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string clientID
+    {
+        get => model.Cliente_Id.ToString();
+        set
+        {
+            model.Cliente_Id = Int32.Parse(value);
+        }
+    }
+}

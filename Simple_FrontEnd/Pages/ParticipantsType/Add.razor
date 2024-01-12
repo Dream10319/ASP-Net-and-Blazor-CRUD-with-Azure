@@ -1,0 +1,59 @@
+﻿@page "/participantsType/add"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IParticipantsTypeService ParticipantsTypeService
+@inject NavigationManager NavigationManager
+
+<h1>Agregar Tipo de participante</h1>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col">
+            <label>Tipo de participante ID</label>
+            <InputNumber @bind-Value="model.Ptype_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Ptype_Id)" />
+        </div>
+        <div class="form-group col">
+            <label>Nombre corto</label>
+            <InputText @bind-Value="model.ShortName" class="form-control" />
+            <ValidationMessage For="@(() => model.ShortName)" />
+        </div>
+        <div class="form-group col">
+            <label>Descripción</label>
+            <InputText @bind-Value="model.Description" class="form-control" />
+            <ValidationMessage For="@(() => model.Description)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button disabled="@loading" class="btn btn-primary">
+            @if (loading)
+            {
+                <span class="spinner-border spinner-border-sm mr-1"></span>
+            }
+            Ahorrar
+        </button>
+        <NavLink href="participantsType" class="btn btn-link">Cancelar</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    private ParticipantsType model = new ParticipantsType();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await ParticipantsTypeService.Register(model);
+            AlertService.Success("ParticipantsType added successfully", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("participantsType");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,185 @@
+﻿@page "/"
+@attribute [Authorize]
+@inject IAccountService AccountService
+
+<div style="margin-top:8%">
+    <div class="container">
+        <div class="list-group borderless p-3">
+            <ol class="olcards">
+                <li style="--cardColor:#fc374e">
+                    <div class="content">
+                        <NavLink href="participants" class="title">Participantes</NavLink>
+                    </div>
+                </li>
+                <li style="--cardColor:#36aeb3">
+                    <div class="content">
+                        <NavLink href="clients" class="title">Clientes</NavLink>
+                    </div>
+                </li>
+                <li style="--cardColor:#162d59">
+                    <div class="content">
+                        <NavLink href="users" class="title">Usuarios</NavLink>
+                    </div>
+                </li>
+                <li style="--cardColor:#f15f0e">
+                    <div class="content">
+                        <NavLink href="logs" class="title">Logs</NavLink>
+                    </div>
+                </li>
+                <li style="--cardColor:#fc374e">
+                    <div class="content">
+                        <NavLink href="participantsType" class="title">Tipo de participantes</NavLink>
+                    </div>
+                </li>
+                <li style="--cardColor:#36aeb3">
+                    <div class="content">
+                        <NavLink href="notifications" class="title">Notificaciones</NavLink>
+                    </div>
+                </li>
+                <li style="--cardColor:#162d59">
+                    <div class="content">
+                        <NavLink href="paymentType" class="title">Tipo de pago</NavLink>
+                    </div>
+                </li>
+            </ol>
+        </div>
+        <div class="logo-back">
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-group-item {
+        border: none;
+        max-width: 220px;
+        margin: 1%;
+        font-size: larger;
+        text-align: center;
+    }
+
+    .logo-back {
+        background: url('assets/simple_logo.png');
+        background-repeat: no-repeat;
+        height: 100%;
+        width: 50%;
+        top: 0px;
+        left: 200px;
+        background-position: center;
+        background-size: auto;
+        position: absolute;
+        background-size: contain;
+        margin-left: 10%;
+    }
+
+    .container{
+        background: url('assets/main_back.jpg');
+        background-repeat: no-repeat;
+        height: 100%;
+        width: 100%;
+        background-position: center;
+        background-size: auto;
+        padding: 0;
+        position: relative;
+    }
+
+    h1 {
+        font-family: sans-serif;
+    }
+
+    .olcards,
+    .olcards * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .olcards {
+        list-style: none;
+        counter-reset: cardCount;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        --cardsGap: 1rem;
+        gap: var(--cardsGap);
+        padding-bottom: var(--cardsGap);
+    }
+
+    .olcards li {
+        counter-increment: cardCount;
+        display: flex;
+        color: white;
+        --labelOffset: 1rem;
+        --arrowClipSize: 1.5rem;
+        margin-top: var(--labelOffset);
+    }
+
+    .olcards li::before {
+        content: counter(cardCount, decimal-leading-zero);
+        background: white;
+        color: var(--cardColor);
+        font-size: 2em;
+        font-weight: 700;
+        transform: translateY(calc(-1 * var(--labelOffset)));
+        margin-right: calc(-1 * var(--labelOffset));
+        z-index: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-inline: 0.5em;
+    }
+
+    .olcards li .content {
+        background-color: var(--cardColor);
+        --inlinePadding: 1em;
+        --boxPadding: 0.5em;
+        display: grid;
+        padding: var(--boxPadding) calc(var(--inlinePadding) + var(--arrowClipSize)) var(--boxPadding) calc(var(--inlinePadding) + var(--labelOffset));
+        grid-template-areas:
+            "icon title"
+            "icon text";
+        gap: 0.25em 1em;
+        clip-path: polygon( 0 0, calc(100% - var(--arrowClipSize)) 0, 100% 50%, calc(100% - var(--arrowClipSize)) 100%, calc(100% - var(--arrowClipSize)) calc(100% + var(--cardsGap)), 0 calc(100% + var(--cardsGap)) );
+        position: relative;
+    }
+
+    .olcards li .content::before {
+        content: "";
+        position: absolute;
+        width: var(--labelOffset);
+        height: var(--labelOffset);
+        background: var(--cardColor);
+        left: 0;
+        bottom: 0;
+        clip-path: polygon(0 0, 100% 0, 0 100%);
+        filter: brightness(0.75);
+    }
+
+    .olcards li .content::after {
+        content: "";
+        position: absolute;
+        height: var(--cardsGap);
+        width: var(--cardsGap);
+        background: linear-gradient(to right, rgba(0, 0, 0, 0.25), transparent 50%);
+        left: 0;
+        top: 100%;
+    }
+
+    .olcards li .icon {
+        grid-area: icon;
+        align-self: center;
+        font-size: 2em;
+    }
+
+    .olcards li .content .title {
+        grid-area: title;
+        font-size: 1.25em;
+        /* font-weight: 700; */
+        color:white;
+    }
+
+    .olcards li .content .text {
+        grid-area: text;
+    }
+
+</style>

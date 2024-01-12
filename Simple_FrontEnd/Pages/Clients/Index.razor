@@ -1,0 +1,84 @@
+﻿@page "/clients"
+@attribute [Authorize]
+@inject IClientsService ClientsService
+
+<h1 style="text-align:center;">Clientes</h1>
+<NavLink href="clients/add" class="btn btn-sm btn-success mb-2">Agregar cliente</NavLink>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 10%">ID de cliente</th>
+            <th style="width: 15%">Primer nombre</th>
+            <th style="width: 15%">Nombre medio</th>
+            <th style="width: 15%">Apellido</th>
+            <th style="width: 20%">Número de identificación</th>
+            <th style="width: 20%">Código de país</th>
+            <th style="width: 20%">Número de teléfono</th>
+            <th style="width: 30%">Correo electrónico</th>
+            <th style="width: 30%">Crear fecha</th>
+            <th style="width: 30%">Actualizar fecha</th>
+            <th style="width: 10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (clients != null)
+        {
+            foreach (var client in clients)
+            {
+                <tr>
+                    <td>@client.Cliente_Id</td>
+                    <td>@client.FirstName</td>
+                    <td>@client.MiddleName</td>
+                    <td>@client.LastNames</td>
+                    <td>@client.Identification_Number</td>
+                    <td>@client.CountryCode</td>
+                    <td>@client.PhoneNumber</td>
+                    <td>@client.Email</td>
+                    <td>@client.CreateDate</td>
+                    <td>@client.UpdateDate</td>
+                    <td style="white-space: nowrap">
+                        <NavLink href="@($"clients/edit/{client.Cliente_Id.ToString()}")" class="btn btn-sm btn-primary mr-1">Editar</NavLink>
+                        <button @onclick="@(() => Deleteclients(client.Cliente_Id.ToString()))" class="btn btn-sm btn-danger btn-delete-user">
+                            @if (client.IsDeleting) 
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Borrar</span>
+                            }
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        @if (loading)
+        {
+            <tr>
+                <td colspan="4" class="text-center">
+                    <span class="spinner-border spinner-border-lg align-center"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool loading;
+    private IList<Custumers> clients;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        clients = await ClientsService.GetAll();
+        loading = false;
+    }
+
+    private async void Deleteclients(string id) 
+    {
+        var client = clients.First(x => x.Cliente_Id.ToString() == id);
+        await ClientsService.Delete(id);
+        clients.Remove(client);
+        StateHasChanged();
+    }
+}

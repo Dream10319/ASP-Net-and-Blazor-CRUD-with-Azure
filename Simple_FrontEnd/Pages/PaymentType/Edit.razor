@@ -1,0 +1,72 @@
+﻿@page "/paymentType/edit/{PaymentTypeId}"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IPaymentTypeService PaymentTypeService
+@inject NavigationManager NavigationManager
+
+<h1>Editar Tipo de pago</h1>
+@if (model != null)
+{
+    <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group col">
+                <label>Tipo de pago ID</label>
+                <InputNumber @bind-Value="model.Payment_Id" class="form-control" />
+                <ValidationMessage For="@(() => model.Payment_Id)" />
+            </div>
+            <div class="form-group col">
+                <label>Descripción</label>
+                <InputText @bind-Value="model.Description" class="form-control" />
+                <ValidationMessage For="@(() => model.Description)" />
+            </div>
+        </div>
+        <div class="form-group">
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Ahorrar
+            </button>
+            <NavLink href="paymentType" class="btn btn-link">Cancelar</NavLink>
+        </div>
+    </EditForm>
+}
+else
+{
+    <div class="text-center p-3">
+        <span class="spinner-border spinner-border-lg align-center"></span>
+    </div>
+}
+
+@code {
+    private PaymentType model;
+    private bool loading;
+
+    [Parameter]
+    public string PaymentTypeId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var participant = await PaymentTypeService.GetById(PaymentTypeId);
+        model = participant;
+    }
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await PaymentTypeService.Update(PaymentTypeId, model);
+            AlertService.Success("Update successful", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("paymentType");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

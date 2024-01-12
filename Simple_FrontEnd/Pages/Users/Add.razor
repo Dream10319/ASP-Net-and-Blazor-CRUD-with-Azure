@@ -1,0 +1,111 @@
+﻿@page "/users/add"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IAccountService AccountService
+@inject NavigationManager NavigationManager
+
+<h1>Agregar usuario</h1>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col-sm-2">
+            <label>Usuaria ID</label>
+            <InputNumber @bind-Value="model.User_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.User_Id)" />
+        </div>
+        <div class="form-group col-sm-2">
+            <label>Part ID</label>
+            <InputNumber @bind-Value="model.Part_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Part_Id)" />
+        </div>
+        <div class="form-group col-sm-4">
+            <label>Primer nombre</label>
+            <InputText @bind-Value="model.FirstName" class="form-control" />
+            <ValidationMessage For="@(() => model.FirstName)" />
+        </div>
+        <div class="form-group col-sm-4">
+            <label>Apellido</label>
+            <InputText @bind-Value="model.LastName" class="form-control" />
+            <ValidationMessage For="@(() => model.LastName)" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col">
+            <label>Correo electrónico</label>
+            <InputText @bind-Value="model.Email" class="form-control" />
+            <ValidationMessage For="@(() => model.Email)" />
+        </div>
+        <div class="form-group col">
+            <label>Contraseña</label>
+            <InputText @bind-Value="model.Password" type="password" class="form-control" />
+            <ValidationMessage For="@(() => model.Password)" />
+        </div>
+        <div class="form-group col">
+            <label>confirmar Contraseña</label>
+            <InputText @bind-Value="confirmPass" type="password" class="form-control" />
+            <ValidationMessage For="@(() => confirmPass)" />
+        </div>
+        <div class="form-group col">
+            <label>Tipo de usuario ID</label>
+            <InputNumber @bind-Value="model.Utype_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Utype_Id)" />
+        </div>
+        <div class="form-group col">
+            <label>Activada</label>
+            <InputSelect @bind-Value="Enabled" class="form-control">
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => Enabled)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button disabled="@loading" class="btn btn-primary">
+            @if (loading) 
+            {
+                <span class="spinner-border spinner-border-sm mr-1"></span>
+            }
+            Ahorrar
+        </button>
+        <NavLink href="users" class="btn btn-link">Cancelar</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    private Users model = new Users();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            if (model.Password != confirmPass) AlertService.Warn("password is not matched", keepAfterRouteChange: true);
+            await AccountService.Register(model);
+            AlertService.Success("User added successfully", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("users");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string Enabled
+    {
+        get
+        {
+            if (model.Enabled) return "true";
+            else return "false";
+        }
+        set
+        {
+            if (value.ToString() == "true") model.Enabled = true;
+            else model.Enabled = false;
+        }
+    }
+
+    private string confirmPass { get; set; }
+}

@@ -1,0 +1,101 @@
+﻿@page "/account/login"
+@inject IAccountService AccountService
+@inject IAlertService AlertService
+@inject NavigationManager NavigationManager
+
+<div style="text-align: -webkit-center;">
+    <div class="row container">
+        <div class="col-md-6 align-self-center">
+            <h4 class="text" style="font-size:3rem;">Bienvenido a SIMPLE</h4>
+            <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+                <div style="background-color:#3A61E0; opacity:1; padding:7% 0% 7% 0%; border-radius:30px; margin:10% 10% 4% 10%">
+                    <div class="form-group">
+                        <label class="text" style="margin-bottom:7%; font-size:x-large">Correo</label>
+                        <InputText style="border-radius:40px; max-width:80%" @bind-Value="model.Email" class="form-control" />
+                        <ValidationMessage For="@(() => model.Email)" />
+                    </div>
+                    <div class="form-group">
+                        <label class="text" style="margin-bottom:7%; font-size:x-large">Contraseña</label>
+                        <InputText style="border-radius:40px; max-width:80%" @bind-Value="model.Password" type="password" class="form-control" />
+                        <ValidationMessage For="@(() => model.Password)" />
+                    </div>
+                </div>   
+                <button style="background-image: linear-gradient(to right, #1F3EB5, #25106C); border-radius:30px; font-size:large; font-weight: bold;" disabled="@loading" class="btn text">
+                    @if (loading)
+                    {
+                        <span class="spinner-border spinner-border-sm mr-1"></span>
+                    }
+                    Iniciar sesión
+                </button>
+            </EditForm>
+            <p type="button" onclick="myFunction()" style="text-decoration:underline; font-size:large; padding-top:2%">
+                Olvidé mi contraseña
+            </p>
+        </div>
+        <div class="col-md-6 login-right-side align-self-center">
+            <div>
+                <img class="image1 mt-5" />
+                <img class="image2" />
+            </div> 
+        </div>
+    </div>
+</div>
+
+@code {
+    private Models.Account.Login model = new Models.Account.Login();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        // reset alerts on submit
+        AlertService.Clear();
+
+        loading = true;
+        try
+        {
+            await AccountService.Login(model);
+            var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+            NavigationManager.NavigateTo(returnUrl);
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error("Username or Password is wrong. try again");
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}
+
+<style>
+
+    .login-right-side {
+        position:relative;
+    }
+
+    .image2 {
+        content: url('assets/login_right_side.jpg');
+        position:absolute;
+        top:80px;
+        left:80px;
+        width:90%;
+        height:90%;
+        border-radius:30px;
+        object-fit:cover;
+    }
+
+    .image1 {
+        content: url('assets/login-back-effect.svg');
+        position:relative;
+        width:100%;
+        height:100%;
+        scale:1.5;
+        padding:10%;
+    }
+
+    .text {
+        text-align: center;
+        color: white;
+    }
+
+</style>

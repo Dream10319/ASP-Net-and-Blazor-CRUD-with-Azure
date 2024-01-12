@@ -1,0 +1,55 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - refs/heads/prod
+      - refs/heads/dev
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  #solution: '**/*.sln'
+  solution: '**/Simple_BackEndAPI.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    #projects: '**/*.csproj'
+    projects: '**/Simple_BackEndAPI.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish Simple BackEnd'
+  inputs:
+    command: 'publish'
+    #publishWebProjects: true
+    publishWebProjects: false
+    projects: '**/Simple_BackEndAPI.csproj'
+
+- ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/dev') }}:
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: 'Azure Subscription SIMPLE(62e77dd9-76e9-4f6d-8843-d459b392e9e3)'
+      appType: 'webApp'
+      #WebAppName: 'simpleBackendDev'
+      WebAppName: 'SimpleBackEndAdminDev'
+      packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    
+- ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/prod') }}:
+  - task: AzureRmWebAppDeployment@4
+    inputs:
+      ConnectionType: 'AzureRM'
+      azureSubscription: 'Azure Subscription SIMPLE(62e77dd9-76e9-4f6d-8843-d459b392e9e3)'
+      appType: 'webApp'
+      WebAppName: 'SimpleBackEndAdminProd'
+      packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'

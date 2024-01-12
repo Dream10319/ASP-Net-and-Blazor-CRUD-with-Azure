@@ -1,0 +1,68 @@
+﻿@page "/notifications"
+@attribute [Authorize]
+@inject INotificationsService NotificationsService
+
+<h1 style="text-align:center;">Notificaciones</h1>
+<NavLink href="notifications/add" class="btn btn-sm btn-success mb-2">Add Notificaciones</NavLink>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 30%">Notificaciones ID</th>
+            <th style="width: 30%">Descripción</th>
+            <th style="width: 10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (notifications != null)
+        {
+            foreach (var notification in notifications)
+            {
+                <tr>
+                    <td>@notification.Notification_Id</td>
+                    <td>@notification.Description</td>
+                    <td style="white-space: nowrap">
+                        <NavLink href="@($"notifications/edit/{notification.Notification_Id.ToString()}")" class="btn btn-sm btn-primary mr-1">Editar</NavLink>
+                        <button @onclick="@(() => DeleteParticipants(notification.Notification_Id.ToString()))" class="btn btn-sm btn-danger btn-delete-user">
+                            @if (notification.IsDeleting) 
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Borrar</span>
+                            }
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        @if (loading)
+        {
+            <tr>
+                <td colspan="4" class="text-center">
+                    <span class="spinner-border spinner-border-lg align-center"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool loading;
+    private IList<NotificationType> notifications;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        notifications = await NotificationsService.GetAll();
+        loading = false;
+    }
+
+    private async void DeleteParticipants(string id) 
+    {
+        var participant = notifications.First(x => x.Notification_Id.ToString() == id);
+        await NotificationsService.Delete(id);
+        notifications.Remove(participant);
+        StateHasChanged();
+    }
+}

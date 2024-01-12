@@ -1,0 +1,77 @@
+﻿@page "/participantsType/edit/{pTypeId}"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IParticipantsTypeService ParticipantsTypeService
+@inject NavigationManager NavigationManager
+
+<h1>Editar Tipo de participante</h1>
+@if (model != null)
+{
+    <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group col">
+                <label>Tipo de participante ID</label>
+                <InputNumber @bind-Value="model.Ptype_Id" class="form-control" />
+                <ValidationMessage For="@(() => model.Ptype_Id)" />
+            </div>
+            <div class="form-group col">
+                <label>Nombre corto</label>
+                <InputText @bind-Value="model.ShortName" class="form-control" />
+                <ValidationMessage For="@(() => model.ShortName)" />
+            </div>
+            <div class="form-group col">
+                <label>Descripción</label>
+                <InputText @bind-Value="model.Description" class="form-control" />
+                <ValidationMessage For="@(() => model.Description)" />
+            </div>
+        </div>
+        <div class="form-group">
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Ahorrar
+            </button>
+            <NavLink href="participantsType" class="btn btn-link">Cancelar</NavLink>
+        </div>
+    </EditForm>
+}
+else
+{
+    <div class="text-center p-3">
+        <span class="spinner-border spinner-border-lg align-center"></span>
+    </div>
+}
+
+@code {
+    private ParticipantsType model;
+    private bool loading;
+
+    [Parameter]
+    public string pTypeId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var participant = await ParticipantsTypeService.GetById(pTypeId);
+        model = participant;
+    }
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await ParticipantsTypeService.Update(pTypeId, model);
+            AlertService.Success("Update successful", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("participantsType");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

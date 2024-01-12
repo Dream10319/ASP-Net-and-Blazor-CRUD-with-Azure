@@ -1,0 +1,70 @@
+﻿@page "/participantsType"
+@attribute [Authorize]
+@inject IParticipantsTypeService ParticipantsTypeService
+
+<h1 style="text-align:center;">Tipo de participante</h1>
+<NavLink href="participantsType/add" class="btn btn-sm btn-success mb-2">Agregar tipo de participante</NavLink>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 30%">Tipo de participante ID</th>
+            <th style="width: 30%">Nombre corto</th>
+            <th style="width: 30%">Descripción</th>
+            <th style="width: 10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (participantsTypes != null)
+        {
+            foreach (var participantsType in participantsTypes)
+            {
+                <tr>
+                    <td>@participantsType.Ptype_Id</td>
+                    <td>@participantsType.ShortName</td>
+                    <td>@participantsType.Description</td>
+                    <td style="white-space: nowrap">
+                        <NavLink href="@($"participantsType/edit/{participantsType.Ptype_Id.ToString()}")" class="btn btn-sm btn-primary mr-1">Editar</NavLink>
+                        <button @onclick="@(() => DeleteParticipants(participantsType.Ptype_Id.ToString()))" class="btn btn-sm btn-danger btn-delete-user">
+                            @if (participantsType.IsDeleting) 
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Borrar</span>
+                            }
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        @if (loading)
+        {
+            <tr>
+                <td colspan="4" class="text-center">
+                    <span class="spinner-border spinner-border-lg align-center"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool loading;
+    private IList<ParticipantsType> participantsTypes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        participantsTypes = await ParticipantsTypeService.GetAll();
+        loading = false;
+    }
+
+    private async void DeleteParticipants(string id) 
+    {
+        var participant = participantsTypes.First(x => x.Ptype_Id.ToString() == id);
+        await ParticipantsTypeService.Delete(id);
+        participantsTypes.Remove(participant);
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,68 @@
+﻿@page "/paymentType"
+@attribute [Authorize]
+@inject IPaymentTypeService PaymentTypeService
+
+<h1 style="text-align:center;">Tipo de pago</h1>
+<NavLink href="paymentType/add" class="btn btn-sm btn-success mb-2">Agregar Tipo de pago</NavLink>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 30%">Tipo de pago ID</th>
+            <th style="width: 30%">Descripción</th>
+            <th style="width: 10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (PaymentTypes != null)
+        {
+            foreach (var paymentType in PaymentTypes)
+            {
+                <tr>
+                    <td>@paymentType.Payment_Id</td>
+                    <td>@paymentType.Description</td>
+                    <td style="white-space: nowrap">
+                        <NavLink href="@($"paymentType/edit/{paymentType.Payment_Id.ToString()}")" class="btn btn-sm btn-primary mr-1">Editar</NavLink>
+                        <button @onclick="@(() => Deletepayment(paymentType.Payment_Id.ToString()))" class="btn btn-sm btn-danger btn-delete-user">
+                            @if (paymentType.IsDeleting) 
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Borrar</span>
+                            }
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        @if (loading)
+        {
+            <tr>
+                <td colspan="4" class="text-center">
+                    <span class="spinner-border spinner-border-lg align-center"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool loading;
+    private IList<PaymentType> PaymentTypes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        PaymentTypes = await PaymentTypeService.GetAll();
+        loading = false;
+    }
+
+    private async void Deletepayment(string id) 
+    {
+        var paymenttype = PaymentTypes.First(x => x.Payment_Id.ToString() == id);
+        await PaymentTypeService.Delete(id);
+        PaymentTypes.Remove(paymenttype);
+        StateHasChanged();
+    }
+}

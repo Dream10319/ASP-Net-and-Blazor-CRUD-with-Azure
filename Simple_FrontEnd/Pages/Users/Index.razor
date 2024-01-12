@@ -1,0 +1,73 @@
+﻿@page "/users"
+@attribute [Authorize]
+@inject IAccountService AccountService
+
+<h1 style="text-align:center;">Usuarias</h1>
+<NavLink href="users/add" class="btn btn-sm btn-success mb-2">Agregar usuario</NavLink>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 30%">Nombre</th>
+            <th style="width: 30%">Correo</th>
+            <th style="width: 30%">Estatus</th>
+            <th style="width: 30%">Tipo de Usuario</th>
+            <th style="width: 10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (users != null)
+        {
+            foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.FirstName @user.LastName</td>
+                    <td>@user.Email</td>
+                    <td>@user.Enabled</td>
+                    <td>@user.Utype_Id</td>
+                    <td style="white-space: nowrap">
+                        <NavLink href="@($"users/edit/{user.User_Id.ToString()}")" class="btn btn-sm btn-primary mr-1">Editar</NavLink>
+                        <button @onclick="@(() => DeleteUser(user.User_Id.ToString()))" class="btn btn-sm btn-danger btn-delete-user">
+                            @if (user.IsDeleting)
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Borrar</span>
+                            }
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        @if (loading)
+        {
+            <tr>
+                <td colspan="4" class="text-center">
+                    <span class="spinner-border spinner-border-lg align-center"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool loading;
+    private IList<Users> users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        users = await AccountService.GetAll();
+        loading = false;
+    }
+
+    private async void DeleteUser(string id) 
+    {
+        var user = users.First(x => x.User_Id.ToString() == id);
+        user.IsDeleting = true;
+        await AccountService.Delete(id);
+        users.Remove(user);
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,74 @@
+﻿@page "/participants"
+@attribute [Authorize]
+@inject IParticipantsService ParticipantsService
+
+<h1 style="text-align:center;">Participantes</h1>
+<NavLink href="participants/add" class="btn btn-sm btn-success mb-2">Add Participantes</NavLink>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 30%">Participantes ID</th>
+            <th style="width: 30%">PartType ID</th>
+            <th style="width: 30%">País ID</th>
+            <th style="width: 30%">Descripción</th>
+            <th style="width: 30%">Activada</th>
+            <th style="width: 10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (participants != null)
+        {
+            foreach (var participant in participants)
+            {
+                <tr>
+                    <td>@participant.Part_Id</td>
+                    <td>@participant.Ptype_Id</td>
+                    <td>@participant.Country_Id</td>
+                    <td>@participant.Description</td>
+                    <td>@participant.Enabled</td>
+                    <td style="white-space: nowrap">
+                        <NavLink href="@($"participants/edit/{participant.Part_Id.ToString()}")" class="btn btn-sm btn-primary mr-1">Editar</NavLink>
+                        <button @onclick="@(() => DeleteParticipants(participant.Part_Id.ToString()))" class="btn btn-sm btn-danger btn-delete-user">
+                            @if (participant.IsDeleting) 
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Borrar</span>
+                            }
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        @if (loading)
+        {
+            <tr>
+                <td colspan="4" class="text-center">
+                    <span class="spinner-border spinner-border-lg align-center"></span>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool loading;
+    private IList<Participants> participants;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        participants = await ParticipantsService.GetAll();
+        loading = false;
+    }
+
+    private async void DeleteParticipants(string id) 
+    {
+        var participant = participants.First(x => x.Part_Id.ToString() == id);
+        await ParticipantsService.Delete(id);
+        participants.Remove(participant);
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,54 @@
+﻿@page "/paymentType/add"
+@attribute [Authorize]
+@inject IAlertService AlertService
+@inject IPaymentTypeService PaymentTypeService
+@inject NavigationManager NavigationManager
+
+<h1>Agregar Tipo de pago</h1>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row">
+        <div class="form-group col">
+            <label>Tipo de pago ID</label>
+            <InputNumber @bind-Value="model.Payment_Id" class="form-control" />
+            <ValidationMessage For="@(() => model.Payment_Id)" />
+        </div>
+        <div class="form-group col">
+            <label>Descripción</label>
+            <InputText @bind-Value="model.Description" class="form-control" />
+            <ValidationMessage For="@(() => model.Description)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button disabled="@loading" class="btn btn-primary">
+            @if (loading)
+            {
+                <span class="spinner-border spinner-border-sm mr-1"></span>
+            }
+            Ahorrar
+        </button>
+        <NavLink href="paymentType" class="btn btn-link">Cancelar</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    private PaymentType model = new PaymentType();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await PaymentTypeService.Register(model);
+            AlertService.Success("PaymentType added successfully", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo("paymentType");
+        }
+        catch (Exception ex)
+        {
+            AlertService.Error(ex.Message);
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}
